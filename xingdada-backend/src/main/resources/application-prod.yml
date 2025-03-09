@@ -1,0 +1,60 @@
+# 线上配置文件
+server:
+  port: 8101
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://{服务器IP}:3306/xingdada
+    username: xingdada
+    password: 123456
+  # Redis 配置
+  redis:
+    database: 1
+    host: {服务器IP}
+    port: 6379
+    password: {密码，没有就省略}
+  # 分库分表配置（开源代码部署可忽略）
+  shardingsphere:
+    #数据源配置
+    datasource:
+      # 多数据源以逗号隔开即可
+      names: xingdada
+      xingdada:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://{服务器IP}:3306/xingdada
+        username: xingdada
+        password: 123456
+    # 规则配置
+    rules:
+      sharding:
+        # 分片算法配置
+        sharding-algorithms:
+          # 自定义分片规则名
+          answer-table-inline:
+            ## inline 类型是简单的配置文件里面就能写的类型，其他还有自定义类等等
+            type: INLINE
+            props:
+              algorithm-expression: user_answer_$->{appId % 2}
+        tables:
+          user_answer:
+            actual-data-nodes: xingdada.user_answer_$->{0..1}
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: appId
+                sharding-algorithm-name: answer-table-inline
+mybatis-plus:
+  configuration:
+    # 生产环境关闭日志
+    log-impl: ''
+# 接口文档配置
+knife4j:
+  basic:
+    enable: true
+    username: root
+    password: 123456
+# AI配置
+ai:
+  apiKey: 318a5c7d0deb4350aa49b8acf98e7ae0.1Q2SDxDhWVS8vl07
